@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Variant_attribute;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 
-class Variant_attributeController extends Controller
+class ProductImageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class Variant_attributeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Variant_attribute $variant_attribute)
+    public function show(ProductImage $productImage)
     {
         //
     }
@@ -42,7 +42,7 @@ class Variant_attributeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Variant_attribute $variant_attribute)
+    public function edit(ProductImage $productImage)
     {
         //
     }
@@ -50,7 +50,7 @@ class Variant_attributeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Variant_attribute $variant_attribute)
+    public function update(Request $request, ProductImage $productImage)
     {
         //
     }
@@ -58,7 +58,7 @@ class Variant_attributeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Variant_attribute $variant_attribute)
+    public function destroy(ProductImage $productImage)
     {
         //
     }

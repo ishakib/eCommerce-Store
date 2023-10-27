@@ -15,31 +15,36 @@ class GenerateEntities extends Command
         $entityData = $this->getDatabaseStructure();
 
         foreach ($entityData as $entityName => $columns) {
-            // Generate migration
+            $migrationName = 'create_' . Str::snake($entityName) . '_table';
+            $baseName = Str::singular(Str::studly($entityName));
+
+            $options = [
+                'name' => $baseName,
+                '--migration' => true,
+            ];
+
             $this->call('make:migration', [
-                'name' => 'create_' . Str::snake($entityName) . '_table',
+                'name' => $migrationName,
                 '--create' => Str::snake($entityName),
             ]);
+
             // Create model
-            $this->call('make:model', [
-                'name' => Str::ucfirst(Str::singular($entityName)), // Use ucfirst and singular name
-                '--migration' => true,
-            ]);
+            $this->call('make:model', $options);
 
             // Create controller
             $this->call('make:controller', [
-                'name' => Str::ucfirst(Str::singular($entityName)) . 'Controller', // Use ucfirst and singular name
-                '--model' => Str::ucfirst(Str::singular($entityName)), // Use ucfirst and singular name
+                'name' => $baseName . 'Controller',
+                '--model' => $baseName,
             ]);
 
             // Create request
             $this->call('make:request', [
-                'name' => Str::ucfirst(Str::singular($entityName)) . 'Request', // Use ucfirst and singular name
+                'name' => $baseName . 'Request',
             ]);
 
             // Generate API resource routes for both API and web
             $this->call('make:resource', [
-                'name' => Str::ucfirst(Str::singular($entityName)) . 'Resource', // Use ucfirst and singular name
+                'name' => $baseName . 'Resource',
             ]);
 
             // Output success message
@@ -65,42 +70,6 @@ class GenerateEntities extends Command
     private function appendFile($path, $content)
     {
         file_put_contents($path, file_get_contents($path) . $content);
-    }
-
-    public function convertLaravelMigration($entityData): array
-    {
-        $laravelEntityData = [];
-
-        foreach ($entityData as $entityName => $columns) {
-            $laravelColumns = [];
-
-            foreach ($columns as $columnName => $columnType) {
-                // Convert column name to snake_case and replace spaces with underscores
-                $laravelColumnName = Str::snake($columnName);
-
-                // Convert column type to Laravel data type
-                $laravelColumnType = match (true) {
-                    str_contains($columnType, 'INT') => 'integer',
-                    str_contains($columnType, 'VARCHAR') => 'string',
-                    str_contains($columnType, 'TEXT') => 'text',
-                    str_contains($columnType, 'DATETIME') => 'dateTime',
-                    default => 'string',
-                };
-
-                // Check for 'Foreign Key' and set 'foreign' attribute if found
-                $foreign = str_contains($columnType, 'Foreign Key');
-
-                // Add the column to the Laravel columns array
-                $laravelColumns[$laravelColumnName] = [
-                    'type' => $laravelColumnType,
-                    'foreign' => $foreign,
-                ];
-            }
-
-            $laravelEntityData[$entityName] = $laravelColumns;
-        }
-
-        return $laravelEntityData;
     }
 
     public function getDatabaseStructure(): array
@@ -185,7 +154,7 @@ class GenerateEntities extends Command
                 'email' => 'VARCHAR',
                 'profile_picture' => 'VARCHAR',
             ],
-            'inventory' => [
+            'inventories' => [
                 'id' => 'INT',
                 'product_id' => 'INT (Foreign Key)',
                 'stock_quantity' => 'INT',
@@ -201,14 +170,13 @@ class GenerateEntities extends Command
                 'end_date' => 'DATETIME',
                 'min_purchase_amount' => 'DECIMAL',
             ],
-            'cart' => [
+            'carts' => [
                 'id' => 'INT',
                 'user_id' => 'INT (Foreign Key)',
                 'product_id' => 'INT (Foreign Key)',
                 'quantity' => 'INT',
             ],
-            'categories_hierarchy' => [
-                // Define this table as needed for managing category hierarchy.
+            'category_hierarchies' => [
             ],
             'attributes' => [
                 'id' => 'INT',
@@ -235,5 +203,41 @@ class GenerateEntities extends Command
         ];
 
         return $this->convertLaravelMigration($entityData);
+    }
+
+    public function convertLaravelMigration($entityData): array
+    {
+        $laravelEntityData = [];
+
+        foreach ($entityData as $entityName => $columns) {
+            $laravelColumns = [];
+
+            foreach ($columns as $columnName => $columnType) {
+                // Convert column name to snake_case and replace spaces with underscores
+                $laravelColumnName = Str::snake($columnName);
+
+                // Convert column type to Laravel data type
+                $laravelColumnType = match (true) {
+                    str_contains($columnType, 'INT') => 'integer',
+                    str_contains($columnType, 'VARCHAR') => 'string',
+                    str_contains($columnType, 'TEXT') => 'text',
+                    str_contains($columnType, 'DATETIME') => 'dateTime',
+                    default => 'string',
+                };
+
+                // Check for 'Foreign Key' and set 'foreign' attribute if found
+                $foreign = str_contains($columnType, 'Foreign Key');
+
+                // Add the column to the Laravel columns array
+                $laravelColumns[$laravelColumnName] = [
+                    'type' => $laravelColumnType,
+                    'foreign' => $foreign,
+                ];
+            }
+
+            $laravelEntityData[$entityName] = $laravelColumns;
+        }
+
+        return $laravelEntityData;
     }
 }

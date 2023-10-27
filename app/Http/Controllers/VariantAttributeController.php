@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categories_hierarchy;
+use App\Models\VariantAttribute;
 use Illuminate\Http\Request;
 
-class Categories_hierarchyController extends Controller
+class VariantAttributeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class Categories_hierarchyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Categories_hierarchy $categories_hierarchy)
+    public function show(VariantAttribute $variantAttribute)
     {
         //
     }
@@ -42,7 +42,7 @@ class Categories_hierarchyController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Categories_hierarchy $categories_hierarchy)
+    public function edit(VariantAttribute $variantAttribute)
     {
         //
     }
@@ -50,7 +50,7 @@ class Categories_hierarchyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Categories_hierarchy $categories_hierarchy)
+    public function update(Request $request, VariantAttribute $variantAttribute)
     {
         //
     }
@@ -58,7 +58,7 @@ class Categories_hierarchyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Categories_hierarchy $categories_hierarchy)
+    public function destroy(VariantAttribute $variantAttribute)
     {
         //
     }
