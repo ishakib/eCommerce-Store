@@ -7,55 +7,43 @@ use Illuminate\Support\Str;
 
 class GenerateEntities extends Command
 {
-    protected $signature = 'generate:entities {entity} {--fields=}';
+    protected $signature = 'generate:entities';
     protected $description = 'Generate migrations, models, controllers, services, and requests for an entity';
 
     public function handle()
     {
-        $entities = $this->getDatabaseStructure();
+        $entityData = $this->getDatabaseStructure();
 
-        foreach ($entities as $entityName => $fields) {
+        foreach ($entityData as $entityName => $columns) {
             // Generate migration
             $this->call('make:migration', [
                 'name' => 'create_' . Str::snake($entityName) . '_table',
                 '--create' => Str::snake($entityName),
             ]);
-
             // Create model
             $this->call('make:model', [
-                'name' => $entityName,
+                'name' => Str::ucfirst(Str::singular($entityName)), // Use ucfirst and singular name
                 '--migration' => true,
             ]);
 
             // Create controller
             $this->call('make:controller', [
-                'name' => $entityName . 'Controller',
-                '--model' => $entityName,
-            ]);
-
-            // Create service
-            $this->call('make:service', [
-                'name' => $entityName . 'Service',
+                'name' => Str::ucfirst(Str::singular($entityName)) . 'Controller', // Use ucfirst and singular name
+                '--model' => Str::ucfirst(Str::singular($entityName)), // Use ucfirst and singular name
             ]);
 
             // Create request
             $this->call('make:request', [
-                'name' => $entityName . 'Request',
+                'name' => Str::ucfirst(Str::singular($entityName)) . 'Request', // Use ucfirst and singular name
             ]);
 
             // Generate API resource routes for both API and web
             $this->call('make:resource', [
-                'name' => $entityName . 'Resource',
+                'name' => Str::ucfirst(Str::singular($entityName)) . 'Resource', // Use ucfirst and singular name
             ]);
 
-            // Add API resource route to routes/api.php
-            $this->addApiResourceRoute('api.php', $entityName);
-
-            // Add API resource route to routes/web.php
-            $this->addApiResourceRoute('web.php', $entityName);
-
             // Output success message
-            $this->info("Generated migration, model, controller, service, request, and API resource for entity: $entityName");
+            $this->info("Generated migration, model, controller, request, and API resource for entity: $entityName");
         }
     }
 
@@ -77,6 +65,42 @@ class GenerateEntities extends Command
     private function appendFile($path, $content)
     {
         file_put_contents($path, file_get_contents($path) . $content);
+    }
+
+    public function convertLaravelMigration($entityData): array
+    {
+        $laravelEntityData = [];
+
+        foreach ($entityData as $entityName => $columns) {
+            $laravelColumns = [];
+
+            foreach ($columns as $columnName => $columnType) {
+                // Convert column name to snake_case and replace spaces with underscores
+                $laravelColumnName = Str::snake($columnName);
+
+                // Convert column type to Laravel data type
+                $laravelColumnType = match (true) {
+                    str_contains($columnType, 'INT') => 'integer',
+                    str_contains($columnType, 'VARCHAR') => 'string',
+                    str_contains($columnType, 'TEXT') => 'text',
+                    str_contains($columnType, 'DATETIME') => 'dateTime',
+                    default => 'string',
+                };
+
+                // Check for 'Foreign Key' and set 'foreign' attribute if found
+                $foreign = str_contains($columnType, 'Foreign Key');
+
+                // Add the column to the Laravel columns array
+                $laravelColumns[$laravelColumnName] = [
+                    'type' => $laravelColumnType,
+                    'foreign' => $foreign,
+                ];
+            }
+
+            $laravelEntityData[$entityName] = $laravelColumns;
+        }
+
+        return $laravelEntityData;
     }
 
     public function getDatabaseStructure(): array
@@ -211,40 +235,5 @@ class GenerateEntities extends Command
         ];
 
         return $this->convertLaravelMigration($entityData);
-    }
-
-    public function convertLaravelMigration($entityData)
-    {
-        $laravelEntityData = [];
-
-        foreach ($entityData as $entityName => $columns) {
-            $laravelColumns = [];
-
-            foreach ($columns as $columnName => $columnType) {
-                // Convert column name to snake_case and replace spaces with underscores
-                $laravelColumnName = Str::snake($columnName);
-
-                // Convert column type to Laravel data type
-                $laravelColumnType = match (true) {
-                    str_contains($columnType, 'INT') => 'integer',
-                    str_contains($columnType, 'VARCHAR') => 'string',
-                    str_contains($columnType, 'TEXT') => 'text',
-                    str_contains($columnType, 'DATETIME') => 'dateTime',
-                    default => 'string',
-                };
-
-                // Check for 'Foreign Key' and set 'foreign' attribute if found
-                $foreign = str_contains($columnType, 'Foreign Key');
-
-                // Add the column to the Laravel columns array
-                $laravelColumns[$laravelColumnName] = [
-                    'type' => $laravelColumnType,
-                    'foreign' => $foreign,
-                ];
-            }
-
-            $laravelEntityData[$entityName] = $laravelColumns;
-
-            return $laravelEntityData;
     }
 }
