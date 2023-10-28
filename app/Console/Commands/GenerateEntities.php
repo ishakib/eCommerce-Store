@@ -79,7 +79,7 @@ class GenerateEntities extends Command
             $columnDefinitions .= "\n\t\t\t\$table->$columnType('$columnName');";
         }
 
-        // Insert the generated column definitions into the migration file
+        // Insert the generated column definitions integero the migration file
         $contents = substr_replace($contents, $columnDefinitions, $pos + 13, 0);
 
         // Write the updated contents back to the migration file
@@ -110,10 +110,106 @@ class GenerateEntities extends Command
         return [
             'users' => [
                 'name' => 'string',
+                'email' => 'email',
+                'password' => 'string',
+                'registration_date' => 'date',
+                'last_login' => 'dateTime',
+                'phone' => 'string',
             ],
             'addresses' => [
                 'user_id' => 'foreignId',
                 'street_address' => 'string',
+                'city' => 'string',
+                'state' => 'string',
+                'postal_code' => 'string',
+                'country' => 'string',
+            ],
+            'categories' => [
+                'name' => 'string',
+            ],
+            'products' => [
+                'name' => 'string',
+                'description' => 'text',
+                'price' => 'decimal',
+                'stock_quantity' => 'integer',
+                'manufacturer' => 'string',
+                'category_id' => 'foreignId',
+            ],
+            'product_images' => [
+                'product_id' => 'foreignId',
+                'image_url' => 'string',
+            ],
+            'orders' => [
+                'user_id' => 'foreignId',
+                'order_date' => 'dateTime',
+                'total_amount' => 'decimal',
+                'shipping_address_id' => 'foreignId',
+                'billing_address_id' => 'foreignId',
+                'payment_method' => 'string',
+            ],
+            'order_items' => [
+                'order_id' => 'foreignId',
+                'product_id' => 'foreignId',
+                'quantity' => 'integer',
+                'price' => 'decimal',
+                'subtotal' => 'decimal',
+            ],
+            'reviews' => [
+                'user_id' => 'foreignId',
+                'product_id' => 'foreignId',
+                'rating' => 'integer',
+                'comment' => 'text',
+                'created_at' => 'dateTime',
+            ],
+            'payments' => [
+                'order_id' => 'foreignId',
+                'amount' => 'decimal',
+                'payment_date' => 'dateTime',
+                'payment_method' => 'string',
+            ],
+            'admins' => [
+                'username' => 'string',
+                'password' => 'string',
+                'email' => 'string',
+                'profile_picture' => 'string',
+            ],
+            'inventories' => [
+                'product_id' => 'foreignId',
+                'stock_quantity' => 'integer',
+                'restock_threshold' => 'integer',
+            ],
+            'promotions' => [
+                'code' => 'string',
+                'description' => 'text',
+                'discount_amount' => 'decimal',
+                'start_date' => 'dateTime',
+                'end_date' => 'dateTime',
+                'min_purchase_amount' => 'decimal',
+            ],
+            'carts' => [
+                'user_id' => 'foreignId',
+                'product_id' => 'foreignId',
+                'quantity' => 'integer',
+            ],
+            'category_hierarchies' => [
+            ],
+            'attributes' => [
+                'name' => 'string',
+                'description' => 'text',
+            ],
+            'variant_attributes' => [
+                'attribute_id' => 'foreignId',
+                'name' => 'string',
+                'description' => 'text',
+            ],
+            'brands' => [
+                'name' => 'string',
+                'description' => 'text',
+            ],
+            'units' => [
+                'name' => 'string',
+                'abbreviation' => 'string',
+                'description' => 'text',
             ],
         ];
     }
